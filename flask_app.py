@@ -28,3 +28,9 @@ def dashboard():
 @app.route('/health')
 def health():
     return jsonify({"status": "ok", "api": "Quotable"})
+    
+@app.route('/debug')
+def debug():
+    from tester.client import call_api
+    resp, lat, err = call_api("GET", "/random")
+    return jsonify({"erreur_reseau": err, "latence": lat})
