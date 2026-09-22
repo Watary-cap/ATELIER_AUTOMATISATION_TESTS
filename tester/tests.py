@@ -1,24 +1,42 @@
-from tester.client import call_api
+from datetime import datetime, timezone
+from tester.tests import run_all_tests
 
-def run_all_tests():
-    results = []
+def execute_run():
+    # Lancer tous les tests
+    tests_results = run_all_tests()
+
+    # Calculer le nombre de succès et d'échecs
+    passed = sum(1 for t in tests_results if t["status"] == "PASS")
+    failed = sum(1 for t in tests_results if t["status"] == "FAIL")
+    total = passed + failed
+
+    # Calcul du taux d'erreur
+    error_rate = round(failed / total, 3) if total > 0 else 1.0
+
+    # Calcul des latences (Moyenne et Percentile 95)
+    latencies = sorted([t["latency_ms"] for t in tests_results])
+    avg_lat = int(sum(latencies) / len(latencies)) if latencies else 0
     
-    # 1. Test du statut HTTP 200 sur /random
-    resp, lat, err = call_api("GET", "/random")
-    status = "PASS" if not err and resp.status_code == 200 else "FAIL"
-    results.append({"name": "GET /random retourne 200", "status": status, "latency_ms": lat})
+    if latencies:
+        p95_index = int(len(latencies) * 0.95)
+        # S'assurer de ne pas dépasser la taille de la liste
+        p95_index = min(p95_index, len(latencies) - 1)
+        p95_lat = latencies[p95_index]
+    else:
+        p95_lat = 0
 
-    # 2. Test du Content-Type (doit être JSON)
-    is_json = not err and "application/json" in resp.headers.get("Content-Type", "")
-    status = "PASS" if is_json else "FAIL"
-    results.append({"name": "Content-Type est JSON", "status": status, "latency_ms": lat})
+    # Construire la structure de données finale
+    run_data = {
+        "api": "Quotable",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "summary": {
+            "passed": passed,
+            "failed": failed,
+            "error_rate": error_rate,
+            "latency_ms_avg": avg_lat,
+            "latency_ms_p95": p95_lat
+        },
+        "tests": tests_results
+    }
 
-    data = resp.json() if is_json else {}
-
-    # 3. Test de la présence du champ obligatoire 'content'
-    status = "PASS" if "content" in data else "FAIL"
-    results.append({"name": "Champ 'content' présent", "status": status, "latencyOui, tu peux tout à fait commiter ton fichier `client.py`. Voici les commandes exactes à taper dans ton terminal et la suite logique de ton flux de travail :
-
-1. **Ajouter le fichier (le préparer pour le commit) :**
-   ```bash
-   git add client.py
+    return run_data
