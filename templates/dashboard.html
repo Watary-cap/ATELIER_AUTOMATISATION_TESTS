@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard API Tests - Quotable</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; background-color: #f9f9f9; }
+        h1, h2 { color: #333; }
+        .btn { padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
+        .btn:hover { background-color: #218838; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; background-color: white; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+        th { background-color: #007BFF; color: white; }
+        .pass { color: green; font-weight: bold; }
+        .fail { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Dashboard QoS - API Quotable</h1>
+    
+    <!-- Bouton pour déclencher un test manuellement -->
+    <a href="/run" class="btn">▶ Lancer un nouveau test automatisé</a>
+    
+    <h2 style="margin-top: 40px;">Historique des exécutions</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Date / Heure</th>
+            <th>Succès</th>
+            <th>Échecs</th>
+            <th>Taux d'erreur</th>
+            <th>Latence Moy. (ms)</th>
+            <th>Latence P95 (ms)</th>
+        </tr>
+        <!-- Boucle Jinja2 pour afficher chaque run de la base de données -->
+        {% for run in runs %}
+        <tr>
+            <td>{{ run.id }}</td>
+            <td>{{ run.timestamp[:19] }}</td>
+            <td class="pass">{{ run.passed }}</td>
+            <td class="{% if run.failed > 0 %}fail{% else %}pass{% endif %}">{{ run.failed }}</td>
+            <td>{{ "%.1f"|format(run.error_rate * 100) }}%</td>
+            <td>{{ run.latency_avg }}</td>
+            <td>{{ run.latency_p95 }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7">Aucun test enregistré. Cliquez sur le bouton ci-dessus pour lancer le premier test.</td></tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
