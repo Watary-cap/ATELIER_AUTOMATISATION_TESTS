@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from tester.client import call_api
 
 def execute_run():
     # Lancer tous les tests
