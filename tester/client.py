@@ -15,7 +15,7 @@ def call_api(method, endpoint, params=None):
     for attempt in range(retries + 1):
         start_time = time.time()
         try:
-            response = requests.request(method, url, params=params, timeout=TIMEOUT_SEC)
+            response = requests.request(method, url, params=params, timeout=TIMEOUT_SEC, verify=False)
             latency_ms = int((time.time() - start_time) * 1000)
             return response, latency_ms, None
             
