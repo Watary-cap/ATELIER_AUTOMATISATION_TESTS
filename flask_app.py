@@ -1,16 +1,30 @@
-from flask import Flask, render_template_string, render_template, jsonify, request, redirect, url_for, session
-from flask import render_template
-from flask import json
-from urllib.request import urlopen
-from werkzeug.utils import secure_filename
-import sqlite3
+from flask import Flask, render_template, redirect, url_for, jsonify
+from tester.runner import execute_run
+from storage import save_run, list_runs
 
 app = Flask(__name__)
 
-@app.get("/")
-def consignes():
-     return render_template('consignes.html')
+@app.route('/')
+def index():
+    # Redirige la page d'accueil directement vers le dashboard
+    return redirect(url_for('dashboard'))
 
-if __name__ == "__main__":
-    # utile en local uniquement
-    app.run(host="0.0.0.0", port=5000, debug=True)
+@app.route('/run')
+def trigger_run():
+    # 1. Exécuter tous les tests
+    run_data = execute_run()
+    # 2. Sauvegarder les résultats dans la base SQLite
+    save_run(run_data)
+    # 3. Rediriger vers le dashboard pour voir le résultat
+    return redirect(url_for('dashboard'))
+
+@app.route('/dashboard')
+def dashboard():
+    # Récupérer l'historique des tests depuis la base de données
+    runs = list_runs()
+    return render_template('dashboard.html', runs=runs)
+
+# Bonus : Route de santé de l'application
+@app.route('/health')
+def health():
+    return jsonify({"status": "ok", "api": "Quotable"})
