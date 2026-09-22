@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-from tester.tests import run_all_tests
 
 def execute_run():
     # Lancer tous les tests
